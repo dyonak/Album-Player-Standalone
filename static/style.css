@@ -1,0 +1,37 @@
+/* Default Light Mode */
+body.light-mode {
+  background-color: #f8f9fa; /* Light gray */
+  color: #212529; /* Dark gray */
+}
+
+body.light-mode .navbar {
+  background-color: #f8f9fa;
+}
+
+body.light-mode .navbar-brand,
+body.light-mode .nav-link {
+  color: #212529;
+}
+
+/* Dark Mode */
+body.dark-mode {
+  background-color: #212529; /* Dark gray */
+  color: #f8f9fa; /* Light gray */
+}
+
+body.dark-mode .navbar {
+  background-color: #212529;
+}
+
+body.dark-mode .navbar-brand,
+body.dark-mode .nav-link {
+  color: #f8f9fa;
+}
+
+.theme-toggle {
+  width: 30px;
+  height: 30px;
+  background-color: #ccc;
+  border-radius: 50%;
+  cursor: pointer;
+}

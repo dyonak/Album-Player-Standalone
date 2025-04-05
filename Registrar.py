@@ -1,0 +1,174 @@
+# Registrar.py
+import spotipy
+from spotipy.oauth2 import SpotifyClientCredentials
+import json
+import logging
+from DBConnector import DBConnector
+from flask import g
+
+logging.basicConfig(level=logging.INFO)
+
+class Registrar:
+    def __init__(self, config_file="config.json"):
+        try:
+            with open(config_file, 'r') as f:
+                data = json.load(f)
+        except FileNotFoundError:
+            logging.error(f"Config file not found: {config_file}")
+            data = {}
+        except json.JSONDecodeError:
+            logging.error(f"Invalid JSON in config file: {config_file}")
+            data = {}
+
+        self.spotify_auth = SpotifyClientCredentials(data["service_api_id"], data["service_api_secret"])
+        self.spotify = spotipy.Spotify(client_credentials_manager=self.spotify_auth)
+        print("Auth'd")
+
+    def get_db(self):
+        """Get the database connection for the current request."""
+        if 'db' not in g:
+            g.db = DBConnector()
+        return g.db
+
+    def lookup_album(self, album_title):
+        """
+        Looks up an album on Spotify, retrieves its details, and calculates the total play time.
+
+        Args:
+            album_title (str): The title of the album to search for.
+
+        Returns:
+            dict: A dictionary containing album details, including total play time, or None if an error occurs.
+        """
+        try:
+            results = self.spotify.search(q=album_title, limit=1, type='album')
+            if not results['albums']['items']:
+                logging.warning(f"No results found for album: {album_title}")
+                return None
+
+            album = results['albums']['items'][0]
+            album_id = album['id']
+            album_name = album['name']
+            artist_name = album['artists'][0]['name']
+            release_date = album['release_date']
+            spotify_uri = album['uri']
+            album_art = album['images'][0]['url']
+            print(album_art)
+
+            # Get album tracks
+            tracks_results = self.spotify.album_tracks(album_id)
+            tracks = tracks_results['items']
+
+            # Calculate total duration
+            total_duration_ms = sum(track['duration_ms'] for track in tracks)
+            total_duration_seconds = total_duration_ms / 1000
+            total_minutes = int(total_duration_seconds // 60)
+            total_seconds = int(total_duration_seconds % 60)
+
+            logging.info(f"Album found: {album_name} by {artist_name}")
+            logging.info(f"Total duration: {total_minutes} minutes, {total_seconds} seconds")
+
+            return {
+                'artist': artist_name,
+                'album_name': album_name,
+                'release_date': release_date,
+                'spotify_uri': spotify_uri,
+                'total_duration_seconds': total_duration_seconds,
+                'album_art': album_art
+            }
+
+        except Exception as e:
+            logging.error(f"Error looking up album: {e}")
+            return None
+
+    def lookup_albums(self, album_title):
+        """
+        Looks up an albums given a search term. Wrangle the metadata and return a list of dicts.
+
+        Args:
+            album_title (str): The title of the album to search for.
+
+        Returns:
+            dict: A dictionary containing album details, including total play time, or None if an error occurs.
+        """
+        try:
+            results = self.spotify.search(q=album_title, limit=5, type='album')
+            if not results['albums']['items']:
+                logging.warning(f"No results found for album: {album_title}")
+                return None
+
+            albums = []
+
+            for result in results['albums']['items']:
+                print(result)
+                album_id = result['id']
+                album_name = result['name']
+                artist_name = result['artists'][0]['name']
+                release_date = result['release_date']
+                spotify_uri = result['uri']
+                album_art = result['images'][0]['url']
+
+                # Get album tracks
+                tracks_results = self.spotify.album_tracks(album_id)
+                tracks = tracks_results['items']
+
+                # Calculate total duration
+                total_duration_ms = sum(track['duration_ms'] for track in tracks)
+                total_duration_seconds = total_duration_ms / 1000
+
+                logging.info(f"Album found: {album_name} by {artist_name}")
+                logging.info(f"Total duration: {total_duration_seconds} seconds")
+
+                albums.append(
+                    {
+                    'artist': artist_name,
+                    'album_name': album_name,
+                    'release_date': release_date,
+                    'spotify_uri': spotify_uri,
+                    'total_duration_seconds': total_duration_seconds,
+                    'album_art': album_art
+                    }
+                )
+
+            return albums
+
+        except Exception as e:
+            logging.error(f"Error looking up album: {e}")
+            return None
+
+    def add_album_to_db(self, album_data, nfc_id):
+        """
+        Adds an album to the database.
+
+        Args:
+            album_data (dict): A dictionary containing album details (as returned by lookup_album).
+            nfc_id (str): The NFC ID associated with the album.
+        """
+        if album_data is None:
+            logging.error("Cannot add album to database: album_data is None")
+            return
+        db = self.get_db()
+        try:
+            db.add_album(
+                album_data['artist'],
+                album_data['album_name'],
+                album_data['release_date'],
+                album_data['spotify_uri'],
+                nfc_id,
+                album_data['total_duration_seconds'],
+                album_data['album_art']
+            )
+            logging.info(f"Album '{album_data['album_name']}' added to database with NFC ID: {nfc_id}")
+        except Exception as e:
+            logging.error(f"Error adding album to database: {e}")
+
+    def register_album(self, album):
+        # Register the album with the system
+        self.album = album
+        print(f"Album registered: {self.album}")
+
+if __name__ == "__main__":
+    r = Registrar()
+    albums = r.lookup_album("Nirvana")
+    for album in albums:
+        print(album)

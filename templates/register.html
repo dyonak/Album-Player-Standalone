@@ -1,0 +1,158 @@
+{% extends 'base.html' %} {% block title %}Register Album{% endblock %} {% block
+head %}
+<style>
+  img {
+    height: 75px;
+    width: 75px;
+  }
+</style>
+{% endblock %} {% block content %}
+<h1>Register Album</h1>
+<form id="search-form">
+  <div class="form-group">
+    <label for="search_term">Search for Album:</label>
+    <input
+      type="text"
+      class="form-control"
+      id="search_term"
+      name="search_term"
+      required
+    />
+  </div>
+  <button type="submit" class="btn btn-primary">Search</button>
+</form>
+
+<div id="search-results" class="mt-4">
+  <!-- Search results will be displayed here -->
+</div>
+
+<!-- Modal -->
+<div
+  class="modal fade"
+  id="albumModal"
+  tabindex="-1"
+  role="dialog"
+  aria-labelledby="albumModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="albumModalLabel">Album Added</h5>
+        <button
+          type="button"
+          class="close"
+          data-dismiss="modal"
+          aria-label="Close"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body" id="albumModalBody">
+        <!-- Album details will be displayed here -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block scripts %}
+<script>
+  const searchForm = document.getElementById("search-form");
+  const searchResults = document.getElementById("search-results");
+  const albumModal = new bootstrap.Modal(document.getElementById("albumModal"));
+  const albumModalBody = document.getElementById("albumModalBody");
+
+  searchForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const searchTerm = document.getElementById("search_term").value;
+
+    fetch("/search", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: `search_term=${encodeURIComponent(searchTerm)}`,
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        const albums = data.albums;
+        const existingAlbums = data.existing_albums;
+        searchResults.innerHTML = ""; // Clear previous results
+
+        // Filter out existing albums
+        const newAlbums = albums.filter((album) => {
+          return !existingAlbums.some(
+            (existingAlbum) => existingAlbum.spotify_uri === album.spotify_uri
+          );
+        });
+
+        if (newAlbums && newAlbums.length > 0) {
+          const table = document.createElement("table");
+          table.classList.add("table", "table-striped", "table-hover");
+          const thead = document.createElement("thead");
+          thead.innerHTML = `
+                <tr>
+                  <th></th>
+                  <th>Artist</th>
+                  <th>Album</th>
+                  <th>Release Date</th>
+                  <th></th>
+                </tr>
+              `;
+          table.appendChild(thead);
+          const tbody = document.createElement("tbody");
+          newAlbums.forEach((album) => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                  <td><img src="${album.album_art}" alt="Album Art"></td>
+                  <td>${album.artist.replace(/"/g, "&quot;")}</td>
+                  <td>${album.album_name.replace(/"/g, "&quot;")}</td>
+                  <td>${album.release_date}</td>
+                  <td><button class="btn btn-success add-album-btn" data-album='${JSON.stringify(
+                    album
+                  )
+                    .replace(/'/g, "&#39;")
+                    .replace(/"/g, "&quot;")}'>Add</button></td>
+                `;
+            tbody.appendChild(row);
+          });
+          table.appendChild(tbody);
+          searchResults.appendChild(table);
+
+          // Add event listeners to "Add" buttons
+          const addButtons = document.querySelectorAll(".add-album-btn");
+          addButtons.forEach((button) => {
+            button.addEventListener("click", () => {
+              const albumData = JSON.parse(button.dataset.album);
+              fetch("/add_album", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify(albumData),
+              })
+                .then((response) => response.json())
+                .then((data) => {
+                  if (data.status === "success") {
+                    albumModalBody.innerHTML = `<p>Album <strong>${albumData.album_name}</strong> by <strong>${albumData.artist}</strong> added successfully!</p>`;
+                    albumModal.show();
+                    // Remove the row from the table after successful add
+                    button.closest("tr").remove();
+                  } else {
+                    albumModalBody.innerHTML = `<p>Error adding album.</p>`;
+                    albumModal.show();
+                  }
+                });
+            });
+          });
+        } else {
+          searchResults.innerHTML = "<p>No new albums found.</p>";
+        }
+      });
+  });
+</script>
+{% endblock %}

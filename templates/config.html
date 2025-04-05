@@ -1,0 +1,86 @@
+{% extends 'base.html' %} {% block title %}Album Player Config Editor{% endblock
+%} {% block head %}
+<style>
+  /* Media query for smaller screens */
+  @media (max-width: 768px) {
+    .form-control-label {
+      text-align: left;
+      margin-bottom: 0.5rem;
+    }
+  }
+</style>
+{% endblock %} {% block content %}
+<h1>Album Player Config Editor</h1>
+<form id="config-form">
+  {% for key, value in config.items() %}
+  <div class="form-group row">
+    <label class="form-control-label col-sm-2 col-form-label" for="{{ key }}"
+      >{{ key|replace('_', ' ')|title }}</label
+    >
+    <div class="col-sm-10">
+      {% if value is string %}
+      <input
+        type="text"
+        class="form-control"
+        id="{{ key }}"
+        name="{{ key }}"
+        value="{{ value }}"
+      />
+      {% elif value is number %}
+      <input
+        type="number"
+        class="form-control"
+        id="{{ key }}"
+        name="{{ key }}"
+        value="{{ value }}"
+      />
+      {% elif value is boolean %}
+      <select class="form-control" id="{{ key }}" name="{{ key }}">
+        <option value="true" {% if value %}selected{% endif %}>True</option>
+        <option value="false" {% if not value %}selected{% endif %}>
+          False
+        </option>
+      </select>
+      {% else %}
+      <textarea class="form-control" id="{{ key }}" name="{{ key }}" rows="3">
+{{ value }}</textarea
+      >
+      {% endif %}
+    </div>
+  </div>
+  {% endfor %}
+  <button type="submit" class="btn btn-primary">Save</button>
+</form>
+{% endblock %} {% block scripts %}
+<script>
+  const form = document.getElementById("config-form");
+  form.addEventListener("submit", function (event) {
+    event.preventDefault();
+    const formData = new FormData(form);
+    const jsonData = {};
+    for (const [key, value] of formData.entries()) {
+      try {
+        jsonData[key] = JSON.parse(value);
+      } catch {
+        jsonData[key] = value;
+      }
+    }
+
+    fetch("/save", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(jsonData),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.status === "success") {
+          alert("Config saved successfully!");
+        } else {
+          alert("Error saving config: " + data.message);
+        }
+      });
+  });
+</script>
+{% endblock %}
