@@ -1,6 +1,10 @@
 NFC album player project
 
-Pi OS Lite 64 install
+Use Raspberry Pi Imager to setup Pi OS Lite 64
+
+Wire up nfc reader to pi with SPI
+http://wiki.sunfounder.cc/index.php?title=PN532_NFC_Module_for_Raspberry_Pi&ref=6doe1gqh2qgn
+
 sudo apt update/upgrade
 
 raspi-config > Interfaces -> Enable SPI
