@@ -2,7 +2,9 @@ NFC album player project
 
 Pi OS Lite 64 install
 sudo apt update/upgrade
+
 raspi-config > Interfaces -> Enable SPI
+
 SPI section of the second link (SPI Communication Instructions for Raspberry Pi)
 -Substitute the official libnfc from github instead of this  - http://dl.bintray.com/nfc-tools/sources/libnfc-1.7.1.tar.bz2
 
