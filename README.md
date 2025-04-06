@@ -1,0 +1,70 @@
+NFC album player project
+
+Pi OS Lite 64 install
+sudo apt update/upgrade
+raspi-config > Interfaces -> Enable SPI
+SPI section of the second link (SPI Communication Instructions for Raspberry Pi)
+-Substitute the official libnfc from github instead of this  - http://dl.bintray.com/nfc-tools/sources/libnfc-1.7.1.tar.bz2
+
+Install pip
+
+sudo apt install git
+mkdir albumplayer
+pull down github album-player project (git clone)
+python3 -m venv my_venv
+source ./my_venv/bin/activate
+pip install -r requirements.txt
+
+Test Registrar.py/Webapp.py
+
+Install nfc module
+pip install nfcpy
+pip3 install adafruit-circuitpython-pn532
+
+At this point the following should work 
+```
+import board
+import busio
+from digitalio import DigitalInOut
+from adafruit_pn532.spi import PN532_SPI
+
+# Create SPI connection
+spi = busio.SPI(board.SCK, board.MOSI, board.MISO)
+cs_pin = DigitalInOut(board.D8)
+
+# Create an instance of the PN532 class
+pn532 = PN532_SPI(spi, cs_pin, debug=False)
+ic, ver, rev, support = pn532.firmware_version
+
+print('Found PN532 with firmware version: {0}.{1}'.format(ver, rev))
+# Configure PN532 to communicate with MiFare cards
+pn532.SAM_configuration()
+
+print("Waiting for RFID/NFC card...")
+while True:
+    # Check if a card is available to read
+    uid = pn532.read_passive_target(timeout=0.5)
+    print(".", end="")
+    # Try again if no card is available.
+    if uid is None:
+        continue
+    print("Found card with UID:", [hex(i) for i in uid])
+```
+
+The above may have been dependent on another install from
+git clone https://github.com/hoanhan101/pn532.git
+and the corresponding 'make init' command listed there
+-I'd try without it and do this as a last resort if needed
+
+Setup code - pull down this repo, setup venv, pip install -r requirements.txt
+Run Webapp.py and check http://album:3029
+-Important: On the config tab set the player name for the sonos speaker you want to play albums to. This speaker is also used to play audio files that contain registration instructions.
+Run AlbumPlayer.py and scan cards, go through the registration process
+
+Copy albumweb and albumplayer service files to /etc/system/systemd/
+-sudo systemctl enable name.service for each of them
+-sudo systemctl daemon-reload
+
+Ref:
+https://blog.stigok.com/2017/10/12/setting-up-a-pn532-nfc-module-on-a-raspberry-pi-using-i2c.html
+http://wiki.sunfounder.cc/index.php?title=PN532_NFC_Module_for_Raspberry_Pi&ref=6doe1gqh2qgn
