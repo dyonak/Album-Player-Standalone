@@ -15,6 +15,7 @@ from NFCPoller import NFCPoller
 from DBConnector import DBConnector
 from Registrar import Registrar
 from SonosController import SonosController
+import Webapp
 import json
 
 configfile = open('./config.json')
@@ -22,29 +23,46 @@ data = json.load(configfile)
 SERVICE = data["service"]
 VOLUME = data["volume"]
 PLAYER = data["player"]
+PORT = data["port"]
 
 if __name__ == "__main__":
 
-    nfc = NFCPoller("test")
+    nfc = NFCPoller()
     db = DBConnector()
-    sc = SonosController(PLAYER)
+    sc = SonosController()
     reg = Registrar()
 
     while True:
         tag = nfc.poll()
 
-        if tag != nfc.current_tag:
+        if nfc.current_tag == None:
+            sc.stop()
+
+        if tag != None:
             # Check for album in db
-            db.connect()
-            results = db.get_album(tag)
-            db.close()
+            print(tag)
+            result = reg.lookup_tag(tag)
 
-            print(results)
-            if results:
-                sc.play_album(results[4])
+            print(result)
+            if result:
+                sc.play_album(result[4])
             else:
-                print("Need to register this album")
+                sc.play_mp3("http://album:3029/audio/detected.mp3")
+                album = None
+                playing = []
+                while not album:
+                    
+                    playing.append(sc.now_playing())
+                    #Scan currently playing, capture a snapshot when it's playing
+                    #Wait about 10 seconds and capture another snapshot
+                    #If it's the same track and it's been playing consistently add this album
+                    sleep(3.0)
+                    if len(playing) > 2 and (int(playing[-1]['position'][-2:]) - int(playing[0]['position'][-2:])) > 10 and playing[0]['artist'] == playing[2]['artist']:
+                        #Album has been playing for over 10 seconds, this seems intentional
+                        album = reg.lookup_album(playing[-1]['artist'] + " " + playing[-1]['album'])
+                        reg.add_album_to_db(album, tag)
+                        sc.play_mp3("http://album:3029/audio/registered.mp3")
 
-        sleep(1)
-        sc.pause()
+                        print("Album registered: " + album['artist'] + " " + album['album_name'])
 
+        sleep(2)

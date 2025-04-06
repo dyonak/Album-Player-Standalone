@@ -4,7 +4,6 @@ from soco.plugins.sharelink import ShareLinkPlugin
 from DBConnector import DBConnector
 from time import sleep
 import json
-from flask import g
 
 configfile = open('./config.json')
 data = json.load(configfile)
@@ -18,16 +17,11 @@ class SonosController:
         self.current_track = None
         players = discover()
         self.player = None
+        self.db = DBConnector()
         for p in players:
             if p.player_name == PLAYER:
                 self.player = p
                 break
-
-    def get_db(self):
-        """Get the database connection for the current request."""
-        if 'db' not in g:
-            g.db = DBConnector()
-        return g.db
 
     def clear_queue(self):
         self.player.clear_queue()
@@ -56,20 +50,31 @@ class SonosController:
     def now_playing(self):
         return self.player.get_current_track_info()
 
-    def play_album(self, uri):
+    def play_mp3(self, link):
         self.pause()
         sleep(0.3)
         self.clear_queue()
         sleep(0.3)
         self.volume(VOLUME)
         sleep(0.3)
+        self.player.play_uri(link)
+
+    def play_album(self, uri):
+        self.pause()
+        sleep(0.3)
+        self.clear_queue()
+        sleep(0.3)
+        self.stop()
+        sleep(0.3)
+        self.volume(VOLUME)
+        sleep(0.3)
         sharelink = ShareLinkPlugin(self.player)
         sharelink.add_share_link_to_queue(uri)
         sleep(0.3)
-        self.play()
-        db = self.get_db()
-        db.update_play_count(uri)
-        db.close()
+        self.player.play_from_queue(0)
+        self.db.connect()
+        self.db.update_play_count(uri)
+        self.db.close()
 
 if __name__ == "__main__":
   sc = SonosController()

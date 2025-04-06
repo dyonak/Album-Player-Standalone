@@ -1,0 +1,12 @@
+[Unit]
+Description=Album Player App
+After=network.target
+
+[Service]
+User=album
+WorkingDirectory=/home/album/Album-Player
+ExecStart=/home/album/Album-Player/my_venv/bin/python3 AlbumPlayer.py
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

@@ -69,7 +69,7 @@ class DBConnector:
             self.connection.rollback()
             raise
 
-    def update_play_count(self, nfc_id):
+    def update_play_count(self, spotify_uri):
         """Update the play count and last played date for an album."""
         self.connect()
         cursor = self.connection.cursor()
@@ -78,8 +78,8 @@ class DBConnector:
                 UPDATE albums
                 SET play_count = play_count + 1,
                     last_played_date = ?
-                WHERE nfc_id = ?
-            ''', (datetime.now().strftime('%Y-%m-%d %H:%M:%S'), nfc_id))
+                WHERE spotify_uri = ?
+            ''', (datetime.now().strftime('%Y-%m-%d %H:%M:%S'), spotify_uri))
             self.connection.commit()
         except sqlite3.Error as e:
             logging.error(f"Error updating play count: {e}")
@@ -143,4 +143,4 @@ class DBConnector:
 
 if __name__=="__main__":
     db = DBConnector()
-    db.create_table()
+    db.add_album("test", "test", "2021", "spotify:playlist:37i9dQZF1E8GTM5dxZeoc2", bytearray(b'7\x8fM\x05'), 50, "https://wiki.project1999.com/images/C_druid.gif")

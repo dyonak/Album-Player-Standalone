@@ -22,7 +22,6 @@ class Registrar:
 
         self.spotify_auth = SpotifyClientCredentials(data["service_api_id"], data["service_api_secret"])
         self.spotify = spotipy.Spotify(client_credentials_manager=self.spotify_auth)
-        print("Auth'd")
 
     def get_db(self):
         """Get the database connection for the current request."""
@@ -136,6 +135,27 @@ class Registrar:
             logging.error(f"Error looking up album: {e}")
             return None
 
+    def lookup_tag(self, tag):
+        """
+        Lookup an nfc tag to see if it's currently in the db.
+
+        If it is, return the spotify uri. If not return None.
+        """
+        if tag is None:
+            logging.error("Cannot lookup tag: tag is None")
+            return
+        
+        db = DBConnector()
+        db.connect()
+        result = db.get_album(tag)
+        db.close()
+
+        if result:
+            print(result)
+            return result
+
+        return None
+
     def add_album_to_db(self, album_data, nfc_id):
         """
         Adds an album to the database.
@@ -147,7 +167,8 @@ class Registrar:
         if album_data is None:
             logging.error("Cannot add album to database: album_data is None")
             return
-        db = self.get_db()
+        db = DBConnector()
+        db.connect()
         try:
             db.add_album(
                 album_data['artist'],
@@ -159,7 +180,9 @@ class Registrar:
                 album_data['album_art']
             )
             logging.info(f"Album '{album_data['album_name']}' added to database with NFC ID: {nfc_id}")
+            db.close()
         except Exception as e:
+            db.close()
             logging.error(f"Error adding album to database: {e}")
 
     def register_album(self, album):
