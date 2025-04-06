@@ -21,26 +21,17 @@ class NFCPoller:
         self.cs_pin = DigitalInOut(board.D8)
         self.nfc_adapter = PN532_SPI(self.spi, self.cs_pin, debug=False)
         self.ic, self.ver, self.rev, self.support = self.nfc_adapter.firmware_version
-        self.current_tag = None
+        self.tag = None
+        self.last_tag = None
         self.nfc_adapter.SAM_configuration()
 
     def poll(self):
         # Start polling for NFC tags
         print("Checking for tag...")
+        self.last_tag = self.tag
+        self.tag = self.nfc_adapter.read_passive_target(timeout=0.5)
 
-        tag = self.nfc_adapter.read_passive_target(timeout=0.5)
-        #Code here to set a tag to the value seen by the hardware
-    
-        if tag and tag != self.current_tag:
-            # New tag detected
-            self.current_tag = tag
-        
-        if self.current_tag and tag == None:
-            print("Tag removed.")
-            self.current_tag = None
-
-        
-        return tag
+        return self.tag
 
 if __name__ == "__main__":
     nfc = NFCPoller()

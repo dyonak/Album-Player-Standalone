@@ -59,6 +59,29 @@ class SonosController:
         sleep(0.3)
         self.player.play_uri(link)
 
+    def get_state(self):
+        try:
+            transport_info = self.player.get_current_transport_info()
+            print(transport_info)
+            state = transport_info.get('current_transport_state')
+            print(state)
+
+            if state == 'PLAYING':
+                print(f"{sonos.player_name} is currently playing.")
+            elif state == 'PAUSED_PLAYBACK':
+                print(f"{sonos.player_name} is currently paused.")
+            elif state == 'STOPPED':
+                print(f"{sonos.player_name} is currently stopped.")
+            elif state == 'TRANSITIONING':
+                print(f"{sonos.player_name} is transitioning between states.")
+            else:
+                print(f"Unknown state: {state}")
+            
+            return state
+
+        except:
+            return None
+
     def play_album(self, uri):
         self.pause()
         sleep(0.3)

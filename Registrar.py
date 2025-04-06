@@ -151,7 +151,6 @@ class Registrar:
         db.close()
 
         if result:
-            print(result)
             return result
 
         return None
