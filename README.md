@@ -1,8 +1,8 @@
 # NFC album player project
 
 ## Products
-PN532 NFC Reader - tried a few, I haven't formed a strong preference on model
-Raspberry Pi - I've run the project on bot a Pi 4 1gb and a Pi Zero 2, recommend using the zero 2 as it's got plenty of resources to cover the need here.
+-PN532 NFC Reader - tried a few, I haven't formed a strong preference on model
+-Raspberry Pi - I've run the project on bot a Pi 4 1gb and a Pi Zero 2, recommend using the zero 2 as it's got plenty of resources to cover the need here.
 
 ## Steps to Setup
 Use Raspberry Pi Imager to setup Pi OS Lite 64
