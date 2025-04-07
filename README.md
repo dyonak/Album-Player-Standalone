@@ -80,3 +80,17 @@ Copy albumweb and albumplayer service files to /etc/system/systemd/
 Ref:
 https://blog.stigok.com/2017/10/12/setting-up-a-pn532-nfc-module-on-a-raspberry-pi-using-i2c.html
 http://wiki.sunfounder.cc/index.php?title=PN532_NFC_Module_for_Raspberry_Pi&ref=6doe1gqh2qgn
+
+
+## Usage
+All of this is assuming you've built some type of device that allows for an album with an NFC sticker tag, or other similar object with a NFC tag, to be placed so that it can be read by the NFC reader that you've configured. 
+
+- Tag the album with the nfc tag (I like to place my tags about 1" inside the album cover, up 1" from the bottom of the album sleeve)
+- Place the album on the "player" so the tag lines up with the reader
+- You'll be prompted on the configured speaker to play the album on your configured speaker
+- Open Sonos and play that album on the configured speaker
+- The registration will poll several times ensuring that an album has been playing for over 10 seconds, if so it add this album to the database
+- After registration the album begins playing
+- You can remove the album at any time to stop playback
+
+Once registered anytime you place that album back on the device it will begin to play.
