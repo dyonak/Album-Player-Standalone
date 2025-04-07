@@ -21,7 +21,7 @@ PORT = data["port"]
 logging.basicConfig(level=logging.ERROR)  # Set the logging level to ERROR or DEBUG if needed
 
 def run_app():
-    http_server = WSGIServer(('', int(PORT)), app)
+    http_server = WSGIServer(('0.0.0.0', int(PORT)), app)
     http_server.serve_forever()
 
 @app.route('/')
@@ -116,4 +116,6 @@ def play_album(album_uri):
 if __name__ == '__main__':
     #dev testing only, use WSGI server below
     #app.run(debug=True, host="0.0.0.0", port=PORT)
+
+    #prod server
     run_app()
