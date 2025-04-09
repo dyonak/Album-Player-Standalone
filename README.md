@@ -81,6 +81,29 @@ Ref:
 https://blog.stigok.com/2017/10/12/setting-up-a-pn532-nfc-module-on-a-raspberry-pi-using-i2c.html
 http://wiki.sunfounder.cc/index.php?title=PN532_NFC_Module_for_Raspberry_Pi&ref=6doe1gqh2qgn
 
+## Docker setup
+Install 64 bit lite os
+
+sudo apt update
+
+sudo apt upgrade
+
+sudo rasip-config > Interfaces > Enable SPI
+
+curl -fsSL https://get.docker.com -o get-docker.sh
+
+chmod +x get-docker.sh
+
+sudo sh ./get-docker.sh
+
+sudo usermod -aG docker [user_name]
+
+exit and reconnect to ssh (needs to be done to re-validate your user's groups)
+
+docker run --privileged --net=host dyonak/albumplayer:latest
+- Verify this by going to hostname.local:3029 in a browser on the same network
+- You should also see NFC cards getting read in the output if you put one near the reader
+
 
 ## Usage
 All of this is assuming you've built some type of device that allows for an album with an NFC sticker tag, or other similar object with a NFC tag, to be placed so that it can be read by the NFC reader that you've configured. 
