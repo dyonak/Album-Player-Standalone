@@ -25,19 +25,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 ADD . /app
 
+#Add executable perms for the run.sh script
 RUN chmod a+x run.sh
-
-#Setup NFS share for /audio files so Sonos can see them
-# Install necessary NFS server packages
-# RUN apt-get update && apt-get install -y --no-install-recommends \
-#     nfs-kernel-server rpcbind portmap
-
-# # Set appropriate permissions (adjust as needed)
-# RUN chown nobody:nogroup ./audio
-# RUN chmod 777 ./audio # Be cautious with 777 in production
-
-# # Configure NFS exports
-# RUN echo "/audio *(rw,sync,no_subtree_check,no_root_squash)" > /etc/exports
 
 # Run app.py when the container launches
 CMD ["./run.sh"]
