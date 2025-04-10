@@ -6,7 +6,7 @@ import logging
 logging.basicConfig(level=logging.INFO)
 
 class DBConnector:
-    def __init__(self, db_name="albums.db"):
+    def __init__(self, db_name="./db/albums.db"):
         self.db_name = db_name
         self.connection = None
         self.create_table()

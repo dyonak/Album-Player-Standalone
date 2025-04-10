@@ -3,8 +3,8 @@ FROM python:3.11.11-slim-bookworm
 #Install container dependencies
 RUN apt-get update
 RUN apt-get install -y --no-install-recommends build-essential python3-dev libxml2-dev libffi-dev
-RUN apt-get update && apt-get install -y gcc g++ libxml2 libxslt-dev libusb-dev libpcsclite-dev i2c-tools
-RUN apt-get install --upgrade python3-setuptools -y
+RUN apt-get install -y gcc g++ libxml2 libxslt-dev libusb-dev libpcsclite-dev i2c-tools
+RUN apt-get install -y --upgrade python3-setuptools
 RUN apt-get install --fix-broken
 
 # Set the working directory in the container
@@ -30,3 +30,7 @@ RUN chmod a+x run.sh
 
 # Run app.py when the container launches
 CMD ["./run.sh"]
+
+#Run command
+#/home/album/album_db 
+#docker run -v /home/album/album_db:/app/db --privileged --net=host dyonak/albumplayer:latest
