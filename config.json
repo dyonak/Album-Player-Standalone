@@ -1,8 +1,0 @@
-{
-  "port": "####",
-  "player": "Speaker Name",
-  "volume": 10,
-  "service": "Service Name",
-  "service_api_id": "#####",
-  "service_api_secret": "#####"
-}
