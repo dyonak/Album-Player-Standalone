@@ -1,8 +1,8 @@
 {
-  "port": "3029",
-  "player": "Office",
+  "port": "####",
+  "player": "Speaker Name",
   "volume": 10,
-  "service": "spotify",
-  "service_api_id": "f57700a154ca4ca580da5aa7cc17f33d",
-  "service_api_secret": "6578b45dbfc34ec5b734f381c04e8322"
+  "service": "Service Name",
+  "service_api_id": "#####",
+  "service_api_secret": "#####"
 }
