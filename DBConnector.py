@@ -1,4 +1,5 @@
 import sqlite3
+import os
 from datetime import datetime
 import logging
 
@@ -143,4 +144,5 @@ class DBConnector:
 
 if __name__=="__main__":
     db = DBConnector()
-    db.add_album("test", "test", "2021", "spotify:playlist:37i9dQZF1E8GTM5dxZeoc2", bytearray(b'7\x8fM\x05'), 50, "https://wiki.project1999.com/images/C_druid.gif")
+    db.create_table()
+    #db.add_album("test", "test", "2021", "spotify:playlist:37i9dQZF1E8GTM5dxZeoc2", bytearray(b'7\x8fM\x05'), 50, "https://wiki.project1999.com/images/C_druid.gif")

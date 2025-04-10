@@ -3,6 +3,17 @@ import busio
 from digitalio import DigitalInOut
 from adafruit_pn532.spi import PN532_SPI
 
+import time
+import board
+import busio
+from digitalio import DigitalInOut
+
+#
+# NOTE: pick the import that matches the interface being used
+#
+# from adafruit_pn532.i2c import PN532_I2C
+from adafruit_pn532.spi import PN532_SPI
+
 # # Create SPI connection
 # spi = busio.SPI(board.SCK, board.MOSI, board.MISO)
 # cs_pin = DigitalInOut(board.D8)

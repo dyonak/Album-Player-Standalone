@@ -33,7 +33,7 @@ def index():
 
 @app.route('/audio/<filename>')
 def serve_music(filename):
-    file_path = os.path.join("/home/album/Album-Player/audio", filename)
+    file_path = os.path.join("./audio", filename)
     if os.path.exists(file_path) and filename.endswith('.mp3'):
         return send_file(file_path, mimetype='audio/mpeg')
     else:
