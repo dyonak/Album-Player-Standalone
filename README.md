@@ -25,100 +25,78 @@ NSS     <==>    CE0
 ### Configure the OS and OS packages
 Use Raspberry Pi Imager, or your preferred imager, to setup Pi OS Lite 64. I'm sure other OS options would work here but you're on your own if you take that path!
 
-Update the packages.
-`sudo apt update && sudo apt upgrade`
-
 Enable SPI so we can communicate with the reader.
+
 `sudo raspi-config` > Interfaces -> Enable SPI
 
-SPI section of the second link (SPI Communication Instructions for Raspberry Pi)
--Substitute the official libnfc from github instead of this  - http://dl.bintray.com/nfc-tools/sources/libnfc-1.7.1.tar.bz2
+Update the packages.
 
-Install pip
+`sudo apt update && sudo apt upgrade`
 
-sudo apt install git
-mkdir albumplayer
-pull down github album-player project (git clone)
-python3 -m venv my_venv
-source ./my_venv/bin/activate
+### Install the OS dependencies
+```
+sudo apt install -y build-essential python3-dev libxml2-dev gcc g++ libxml2 libxslt-dev libusb-dev libpcsclite-dev i2c-tool python3-setuptools python3-pip git
+
+mkdir libnfc && cd libnfc
+wget https://github.com/nfc-tools/libnfc/releases/download/libnfc-1.8.0/libnfc-1.8.0.tar.bz2
+tar -xf libnfc-1.8.0.tar.bz2
+./libnfc-1.8.0/configure --prefix=/usr --sysconfdir=/etc
+make
+make install
+```
+
+After completing the above package and libnfc installs you'll need to create the following file at:
+
+`/etc/nfc/libnfc.conf`
+
+```
+# Allow device auto-detection (default: true)
+# Note: if this auto-detection is disabled, user has to set manually a device
+# configuration using file or environment variable
+allow_autoscan = true
+
+# Allow intrusive auto-detection (default: false)
+# Warning: intrusive auto-detection can seriously disturb other devices
+# This option is not recommended, user should prefer to add manually his device.
+allow_intrusive_scan = false
+
+# Set log level (default: error)
+# Valid log levels are (in order of verbosity): 0 (none), 1 (error), 2 (info), 3 (debug)
+# Note: if you compiled with --enable-debug option, the default log level is "debug"
+log_level = 1
+
+# Manually set default device (no default)
+# To set a default device, you must set both name and connstring for your device
+# Note: if autoscan is enabled, default device will be the first device available in device list.
+device.name = "_PN532_SPI"
+device.connstring = "pn532_spi:/dev/spidev0.0:500000"
+#device.name = "_PN532_I2c"
+#device.connstring = "pn532_i2c:/dev/i2c-1"
+```
+
+### Configure python/pip/repo
+
+The following will grab this repo, create a directory to store it in and then setup a python virtual environment that includes all of the required modules. This project has a lot of modules and I highly recommend using the virtual environment so as not to clutter up your global modules.
+```
+git clone https://github.com/dyonak/Album-Player-Standalone
+cd Album-Player-Standalone
+python3 -m venv myvenv
+source ./myvenv/bin/activate
 pip install -r requirements.txt
-
-Test Registrar.py/Webapp.py
-
-Install nfc module
-pip install nfcpy
-pip3 install adafruit-circuitpython-pn532
-
-At this point the following should work 
-```
-import board
-import busio
-from digitalio import DigitalInOut
-from adafruit_pn532.spi import PN532_SPI
-
-# Create SPI connection
-spi = busio.SPI(board.SCK, board.MOSI, board.MISO)
-cs_pin = DigitalInOut(board.D8)
-
-# Create an instance of the PN532 class
-pn532 = PN532_SPI(spi, cs_pin, debug=False)
-ic, ver, rev, support = pn532.firmware_version
-
-print('Found PN532 with firmware version: {0}.{1}'.format(ver, rev))
-# Configure PN532 to communicate with MiFare cards
-pn532.SAM_configuration()
-
-print("Waiting for RFID/NFC card...")
-while True:
-    # Check if a card is available to read
-    uid = pn532.read_passive_target(timeout=0.5)
-    print(".", end="")
-    # Try again if no card is available.
-    if uid is None:
-        continue
-    print("Found card with UID:", [hex(i) for i in uid])
 ```
 
-The above may have been dependent on another install from
-git clone https://github.com/hoanhan101/pn532.git
-and the corresponding 'make init' command listed there
--I'd try without it and do this as a last resort if needed
+**NOTE** - You'll notice your terminal is now prefixed with (my_venv), this indicates you're working in the python virtual environment. To deactivate this simply use `deactivate`. Repeat the `source ./myvenv/bin/activate` to re-enter the venv.
 
-Setup code - pull down this repo, setup venv, pip install -r requirements.txt
-Run Webapp.py and check http://album:3029
--Important: On the config tab set the player name for the sonos speaker you want to play albums to. This speaker is also used to play audio files that contain registration instructions.
+## Configuration of the Album Player
+
+Run `python3 Webapp.py` and check http://<hostname/IP>:3029
+
+**Note** - On the config tab set the player name for the sonos speaker you want to play albums to. This speaker is also used to play audio files that contain registration instructions.
 Run AlbumPlayer.py and scan cards, go through the registration process
 
 Copy albumweb and albumplayer service files to /etc/system/systemd/
 -sudo systemctl enable name.service for each of them
 -sudo systemctl daemon-reload
-
-Ref:
-https://blog.stigok.com/2017/10/12/setting-up-a-pn532-nfc-module-on-a-raspberry-pi-using-i2c.html
-http://wiki.sunfounder.cc/index.php?title=PN532_NFC_Module_for_Raspberry_Pi&ref=6doe1gqh2qgn
-
-## Docker setup
-Install 64 bit lite os
-
-sudo apt update
-
-sudo apt upgrade
-
-sudo rasip-config > Interfaces > Enable SPI
-
-curl -fsSL https://get.docker.com -o get-docker.sh
-
-chmod +x get-docker.sh
-
-sudo sh ./get-docker.sh
-
-sudo usermod -aG docker [user_name]
-
-exit and reconnect to ssh (needs to be done to re-validate your user's groups)
-
-docker run --privileged --net=host dyonak/albumplayer:latest
-- Verify this by going to hostname.local:3029 in a browser on the same network
-- You should also see NFC cards getting read in the output if you put one near the reader
 
 ## Usage
 All of this is assuming you've built some type of device that allows for an album with an NFC sticker tag, or other similar object with a NFC tag, to be placed so that it can be read by the NFC reader that you've configured. 
