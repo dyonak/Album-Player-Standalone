@@ -1,21 +1,35 @@
 # NFC album player project
 
 ## Products
--PN532 NFC Reader - tried a few, I haven't formed a strong preference on model
-
--Raspberry Pi - I've run the project on bot a Pi 4 1gb and a Pi Zero 2, recommend using the zero 2 as it's got plenty of resources to cover the need here.
+1. PN532 NFC Reader
+    - I've tried a few, I haven't formed a strong preference on model.
+    - Tested
+2. Raspberry Pi
+    - I've run the project on bot a Pi 4 1gb and a Pi Zero 2, recommend using the zero 2 as it's got plenty of resources to cover the need here.
 
 ## Steps to Setup
 
+### Configure the hardware
+Wire up nfc reader to pi with SPI.
+```
+PN532   <==>    Raspberry
+5V      <==>    5V
+GND     <==>    GND
+SCK     <==>    SCKL
+MISO	<==>    MISO
+MOSI    <==>    MOSI
+NSS     <==>    CE0
+```
+**NOTE** - Your PN532 board likely has SEL0 and SEL1 switches, or some other method to configure it's mode (SPI, I2C, UART). Make sure these are setup for SPI per your model's instrucations.
+
 ### Configure the OS and OS packages
-Use Raspberry Pi Imager to setup Pi OS Lite 64
+Use Raspberry Pi Imager, or your preferred imager, to setup Pi OS Lite 64. I'm sure other OS options would work here but you're on your own if you take that path!
 
-Wire up nfc reader to pi with SPI
-http://wiki.sunfounder.cc/index.php?title=PN532_NFC_Module_for_Raspberry_Pi&ref=6doe1gqh2qgn
+Update the packages.
+`sudo apt update && sudo apt upgrade`
 
-sudo apt update/upgrade
-
-raspi-config > Interfaces -> Enable SPI
+Enable SPI so we can communicate with the reader.
+`sudo raspi-config` > Interfaces -> Enable SPI
 
 SPI section of the second link (SPI Communication Instructions for Raspberry Pi)
 -Substitute the official libnfc from github instead of this  - http://dl.bintray.com/nfc-tools/sources/libnfc-1.7.1.tar.bz2
