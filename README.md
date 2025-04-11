@@ -91,22 +91,35 @@ pip install -r requirements.txt
 
 Run `python3 Webapp.py` and check http://<hostname/IP>:3029
 
-**Note** - On the config tab set the player name for the sonos speaker you want to play albums to. This speaker is also used to play audio files that contain registration instructions.
-Run AlbumPlayer.py and scan cards, go through the registration process
+**NOTE** - On the config tab set the player name for the Sonos speaker you want to play albums to. This speaker is also used to play audio files that contain registration instructions. You'll also need to set the service name (currently only "spotify" is supported), the service_api_id and service_api_secret. You can create an app and get these last two configuration items at developer.spotify.com. Create an account, go to your Dashboard, click the button that says "Create app".
 
-Copy albumweb and albumplayer service files to /etc/system/systemd/
--sudo systemctl enable name.service for each of them
--sudo systemctl daemon-reload
+After providing all of the information in the config page of the webapp you'll want to create and enable two services to run on the system. 
+
+1. albumweb.service
+    - Hosts the page just used to configure the app but also shows your currently registered albums, allows you to delete albums removed from your collection, and shares some metrics about your "plays" for each album.
+2. albumplayer.service
+    - Continually scans for new albums (nfc cards) being read and plays them or, in cases where the album does not exist in your collection, begins the registration process.
+
+To make sure these are running as services, starting automatically on bootup, follow these instructions.
+`cp albumweb.service /etc/systemd/system/albumweb.service`
+`cp albumweb.service /etc/systemd/system/albumplayer.service`
+`sudo systemctl enable albumweb.service`
+`sudo systemctl enable albumplayer.service`
+`sudo systemctl start albumweb.service`
+`sudo systemctl start albumplayer.service`
+`sudo systemctl daemon-reload`
 
 ## Usage
-All of this is assuming you've built some type of device that allows for an album with an NFC sticker tag, or other similar object with a NFC tag, to be placed so that it can be read by the NFC reader that you've configured. 
+All of this is assuming you've built some type of stand that allows for an album with an NFC sticker tag, or other similar object with a NFC tag, to be placed so that it can be read by the NFC reader that you've configured. 
 
-- Tag the album with the nfc tag (I like to place my tags about 1" inside the album cover, up 1" from the bottom of the album sleeve)
-- Place the album on the "player" so the tag lines up with the reader
-- You'll be prompted on the configured speaker to play the album on your configured speaker
-- Open Sonos and play that album on the configured speaker
-- The registration will poll several times ensuring that an album has been playing for over 10 seconds, if so it add this album to the database
-- After registration the album begins playing
-- You can remove the album at any time to stop playback
+1. Tag the album with the nfc tag (I like to place my tags about 1" inside the album cover, up 1" from the bottom of the album sleeve)
+2. Place the album on the "player" so the tag lines up with the reader
+3. You'll be prompted on the configured speaker to play the album on your configured speaker
+4. Open Sonos and play that album on the configured speaker
+5. The registration will poll several times ensuring that an album has been playing for over 10 seconds, if so it add this album to the database
+6. After registration the album begins playing
+7. You can remove the album at any time to stop playback
 
-Once registered anytime you place that album back on the device it will begin to play.
+Once an album has been registered you can place that album on the player at anytime to begin playback on your configured Sonos speaker.
+
+Enjoy!
