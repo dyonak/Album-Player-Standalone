@@ -32,11 +32,13 @@ class NFCPoller:
         #print("Checking for tag...")
         self.last_tag = self.tag
         self.tag = self.nfc_adapter.read_passive_target(timeout=0.5)
-        #print(f'From Poller\nCurrent:{self.tag}\nPrevious:{self.last_tag}')
+        print(f'From Poller\nCurrent:{self.tag}\nPrevious:{self.last_tag}')
 
 if __name__ == "__main__":
     nfc = NFCPoller()
-    nfc.poll()
+    while True:
+        sleep(1.0)
+        nfc.poll()
 
 
 # print("Waiting for RFID/NFC card...")
