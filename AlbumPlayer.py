@@ -16,7 +16,6 @@
 from time import sleep
 import requests
 from NFCPoller import NFCPoller
-from DBConnector import DBConnector
 from Registrar import Registrar
 from SonosController import SonosController
 import Webapp
@@ -32,7 +31,6 @@ PORT = data["port"]
 if __name__ == "__main__":
 
     nfc = NFCPoller()
-    db = DBConnector()
     sc = SonosController()
     reg = Registrar()
 

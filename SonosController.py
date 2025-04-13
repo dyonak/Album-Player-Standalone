@@ -1,7 +1,7 @@
 from soco import SoCo, discover
 from soco.music_services import MusicService
 from soco.plugins.sharelink import ShareLinkPlugin
-from DBConnector import DBConnector
+import DBConnector
 from time import sleep
 import json
 
@@ -17,7 +17,6 @@ class SonosController:
         self.current_track = None
         players = discover()
         self.player = None
-        self.db = DBConnector()
         for p in players:
             if p.player_name == PLAYER:
                 self.player = p
@@ -95,9 +94,7 @@ class SonosController:
         sharelink.add_share_link_to_queue(uri)
         sleep(0.3)
         self.player.play_from_queue(0)
-        self.db.connect()
-        self.db.update_play_count(uri)
-        self.db.close()
+        DBConnector.update_play_count(uri)
 
 if __name__ == "__main__":
   sc = SonosController()

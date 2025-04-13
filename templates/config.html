@@ -49,13 +49,39 @@
     </div>
   </div>
   {% endfor %}
-  <button type="submit" class="btn btn-primary">Save</button>
+  <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#confirmationModal">Save</button>
 </form>
+
+<div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmationModalLabel">Confirm Save</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Are you sure you want to save these changes?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="confirm-button">Confirm</button>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %} {% block scripts %}
 <script>
   const form = document.getElementById("config-form");
-  form.addEventListener("submit", function (event) {
-    event.preventDefault();
+  const confirmButton = document.getElementById("confirm-button");
+  const confirmationModalElement = document.getElementById("confirmationModal");
+  const confirmationModal = new bootstrap.Modal(confirmationModalElement);
+
+  confirmButton.addEventListener("click", function () {
+    submitForm();
+    confirmationModal.hide(); // Hide the modal after confirmation
+  });
+
+  function submitForm() {
     const formData = new FormData(form);
     const jsonData = {};
     for (const [key, value] of formData.entries()) {
@@ -73,14 +99,7 @@
       },
       body: JSON.stringify(jsonData),
     })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.status === "success") {
-          alert("Config saved successfully!");
-        } else {
-          alert("Error saving config: " + data.message);
-        }
-      });
-  });
+      .then((response) => response.json());
+  }
 </script>
 {% endblock %}
