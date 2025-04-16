@@ -2,7 +2,6 @@ import board
 import busio
 from digitalio import DigitalInOut
 from adafruit_pn532.spi import PN532_SPI
-
 import time
 
 # # Create SPI connection
@@ -37,7 +36,7 @@ class NFCPoller:
 if __name__ == "__main__":
     nfc = NFCPoller()
     while True:
-        sleep(1.0)
+        time.sleep(1.0)
         nfc.poll()
 
 
