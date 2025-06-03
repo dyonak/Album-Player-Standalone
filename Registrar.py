@@ -8,7 +8,7 @@ import DBConnector
 logging.basicConfig(level=logging.INFO)
 
 class Registrar:
-    def __init__(self, config_file="config.json"):
+    def __init__(self, config_file="./config.json"):
         try:
             with open(config_file, 'r') as f:
                 data = json.load(f)

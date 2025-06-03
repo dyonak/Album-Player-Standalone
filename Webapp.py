@@ -7,21 +7,24 @@ import DBConnector
 from SonosController import SonosController
 from gevent.pywsgi import WSGIServer
 import os
+from config import Config
+
 
 app = Flask(__name__)
 registrar = Registrar()
 sc = SonosController()
 
-configfile = open('./config.json')
-data = json.load(configfile)
-PORT = data["port"]
-
 # Configure logging
 logging.basicConfig(level=logging.ERROR)  # Set the logging level to ERROR or DEBUG if needed
 
 def run_app():
-    http_server = WSGIServer(('0.0.0.0', int(PORT)), app)
-    http_server.serve_forever()
+    config = Config()
+    #dev testing only, use WSGI server below
+    app.run(host="0.0.0.0", port=config.port, debug=True)
+
+    #prod server
+    #http_server = WSGIServer(('0.0.0.0', int(config.port)), app)
+    #http_server.serve_forever()
 
 @app.route('/')
 def index():
@@ -103,8 +106,4 @@ def play_album(album_uri):
         return jsonify({'status': 'error'})
 
 if __name__ == '__main__':
-    #dev testing only, use WSGI server below
-    app.run(host="0.0.0.0", port=PORT, debug=True)
-
-    #prod server
-    #run_app()
+    run_app()

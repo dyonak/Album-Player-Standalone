@@ -4,21 +4,17 @@ from soco.plugins.sharelink import ShareLinkPlugin
 import DBConnector
 from time import sleep
 import json
-
-configfile = open('./config.json')
-data = json.load(configfile)
-SERVICE = data["service"]
-VOLUME = data["volume"]
-PLAYER = data["player"]
+import config
 
 class SonosController:
     def __init__(self):
         self.player = None
+        self.config = config.Config()
         self.current_track = None
         players = discover()
         self.player = None
         for p in players:
-            if p.player_name == PLAYER:
+            if p.player_name == self.config.player:
                 self.player = p
                 break
 
@@ -50,11 +46,12 @@ class SonosController:
         return self.player.get_current_track_info()
 
     def play_mp3(self, link):
+        self.config.reload()
         self.pause()
         sleep(0.3)
         self.clear_queue()
         sleep(0.3)
-        self.volume(VOLUME)
+        self.volume(self.config.volume)
         sleep(0.3)
         self.player.play_uri(link)
 
@@ -82,13 +79,14 @@ class SonosController:
             return None
 
     def play_album(self, uri):
+        self.config.reload()
         self.pause()
         sleep(0.3)
         self.clear_queue()
         sleep(0.3)
         self.stop()
         sleep(0.3)
-        self.volume(VOLUME)
+        self.volume(self.config.volume)
         sleep(0.3)
         sharelink = ShareLinkPlugin(self.player)
         sharelink.add_share_link_to_queue(uri)
@@ -98,7 +96,7 @@ class SonosController:
 
 if __name__ == "__main__":
   sc = SonosController()
-  sc.volume(VOLUME)
+  sc.volume(sc.config.volume)
 
   sc.play_album("")
   sleep(60)
