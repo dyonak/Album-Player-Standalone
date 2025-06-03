@@ -35,7 +35,7 @@ Update the packages.
 
 ### Install the OS dependencies
 ```
-sudo apt install -y build-essential python3-dev libxml2-dev gcc g++ libxml2 libxslt-dev libusb-dev libpcsclite-dev i2c-tool python3-setuptools python3-pip git
+sudo apt install -y build-essential python3-dev libxml2-dev gcc g++ libxml2 libxslt1-dev libusb-dev libpcsclite-dev libffi-dev python3-setuptools python3-pip git
 
 mkdir libnfc && cd libnfc
 wget https://github.com/nfc-tools/libnfc/releases/download/libnfc-1.8.0/libnfc-1.8.0.tar.bz2
