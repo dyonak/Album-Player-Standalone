@@ -50,9 +50,11 @@ def delete_album(album_uri):
 
 @app.route('/config')
 def config():
-    with open('config.json', 'r') as f:
-        config = json.load(f)
-    return render_template('config.html', config=config)
+    config = Config()
+    config.reload()
+    #Turn the config attributes into a list for passing to the jinja template
+    configdict = vars(config)
+    return render_template('config.html', config=configdict)
 
 @app.route('/save', methods=['POST'])
 def save_config():
