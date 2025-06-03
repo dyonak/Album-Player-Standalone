@@ -11,6 +11,7 @@ def connect():
     """Establish a connection to the database."""
     try:
         connection = sqlite3.connect(db_name)
+        create_table(connection)
         return connection
     except sqlite3.Error as e:
         logging.error(f"Error connecting to database: {e}")
@@ -32,9 +33,8 @@ def execute_query(query, params=()):
         conn.commit()
         return cursor
 
-def create_table():
+def create_table(connection):
     """Create the albums table if it doesn't exist."""
-    connection = connect()
     cursor = connection.cursor()
     try:
         cursor.execute('''
