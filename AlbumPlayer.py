@@ -35,7 +35,7 @@ if __name__ == "__main__":
     while True:
         nfc.poll()
         print(f'Poll complete\nCurrent:{nfc.tag}\nPrevious:{nfc.last_tag}')
-        sleep(1.0) #Wait long enough for the device timeout
+        sleep(0.7) #Wait long enough for the device timeout
 
         #No tag present but previous poll had a tag, album was removed - stop the playing
         if nfc.tag == None and nfc.last_tag:

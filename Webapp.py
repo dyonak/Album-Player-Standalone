@@ -99,8 +99,11 @@ def add_album():
 
 @app.route('/play_album/<path:album_uri>', methods=['GET'])
 def play_album(album_uri):
+    sc.get_state()
+    if sc.state == "PLAYING":
+        sc.pause()
+        return jsonify({'status':'success'})
     try:
-        print(album_uri)
         sc.play_album(album_uri)
         return jsonify({'status': 'success'})
     except Exception as e:
